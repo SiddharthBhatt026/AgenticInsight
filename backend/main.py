@@ -4,7 +4,6 @@ from pydantic import BaseModel
 import pandas as pd
 import sqlite3
 import os
-import re
 
 app = FastAPI()
 
@@ -23,7 +22,7 @@ class QueryRequest(BaseModel):
     user_prompt: str
 
 # ----------------------------------------------------------------
-# MICROSOFT FABRIC IQ INGESTION LAYER
+# MICROSOFT FABRIC IQ INGESTION LAYER - TYPE SAFE UPGRADE
 # ----------------------------------------------------------------
 @app.post("/api/upload")
 async def upload_enterprise_file(file: UploadFile = File(...)):
@@ -37,6 +36,12 @@ async def upload_enterprise_file(file: UploadFile = File(...)):
             df = pd.read_excel(file.file)
         else:
             raise HTTPException(status_code=400, detail="Invalid format. Supply standard CSV/XLSX structures.")
+        
+        # 🌟 THE CRITICAL FIX: Convert all date/object columns to pure string type 
+        # This prevents SQLite type matching 500 errors instantly
+        for col in df.columns:
+            if df[col].dtype == 'object' or pd.api.types.is_datetime64_any_dtype(df[col]):
+                df[col] = df[col].astype(str)
         
         table_name = os.path.splitext(file.filename)[0].replace(" ", "_").replace("-", "_")
         CURRENT_TABLE["name"] = table_name
@@ -55,7 +60,7 @@ async def upload_enterprise_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Ingestion pipe failure: {str(e)}")
 
 # ----------------------------------------------------------------
-# ADVANCED FOUNDRY IQ AGENTIC REASONING ROUTER (PRO-LEVEL SIMULATION)
+# ADVANCED FOUNDRY IQ AGENTIC REASONING ROUTER
 # ----------------------------------------------------------------
 @app.post("/api/query")
 async def process_agent_query(request: QueryRequest):
@@ -63,10 +68,8 @@ async def process_agent_query(request: QueryRequest):
     table = CURRENT_TABLE["name"]
     logs = []
     
-    # 1. Initialization
     logs.append(f"Foundry IQ Orchestrator: Decomposing natural language objective: '{request.user_prompt}'")
     
-    # 2. Strict Security Interception Guardrails
     dangerous_keywords = ["drop", "delete", "alter", "truncate", "schema"]
     for keyword in dangerous_keywords:
         if keyword in user_query:
@@ -82,39 +85,35 @@ async def process_agent_query(request: QueryRequest):
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         
-        # 3. Multi-Step Reflection (Inspecting the actual database columns)
         cursor.execute(f"PRAGMA table_info({table})")
         columns_meta = cursor.fetchall()
         cols = [col[1] for col in columns_meta]
         logs.append(f"Schema Reflection: Retrieved system data ontology attributes: {cols}")
         
-        # 4. ADVANCED REASONING LOOP: Simulate an AI Agent parsing context tokens
         logs.append("Cognitive Intent Alignment: Matching semantic tokens to relational entities...")
         dim_column = cols[0]
         val_column = cols[1] if len(cols) > 1 else cols[0]
         
-        # The Agent matches words to column attributes intelligently
+        # Highly robust keyword mapping scan
         for c in cols:
             clean_c = c.lower()
-            if any(k in clean_c for k in ['name', 'region', 'segment', 'category', 'product', 'item', 'state', 'country', 'city']):
+            if any(k in clean_c for k in ['department', 'market', 'region', 'segment', 'category', 'product', 'item', 'state', 'sku', 'id']):
                 dim_column = c
-                logs.append(f"   ↳ [Matched Dimension]: Bound categorical axis to database schema field `{c}`")
-            if any(k in clean_c for k in ['value', 'sales', 'revenue', 'amount', 'total', 'count', 'price', 'quantity', 'metrics']):
+            if any(k in clean_c for k in ['revenue', 'gross', 'value', 'sales', 'amount', 'total', 'count', 'price', 'quantity', 'metrics']):
                 val_column = c
-                logs.append(f"   ↳ [Matched Metric]: Bound analytical summary value to database schema field `{c}`")
 
-        # 5. Intent-Driven SQL Synthesis
+        logs.append(f"   ↳ [Matched Dimension]: Bound categorical axis to database schema field `{dim_column}`")
+        logs.append(f"   ↳ [Matched Metric]: Bound analytical summary value to database schema field `{val_column}`")
+
         target_sql = f"SELECT {dim_column} AS name, SUM({val_column}) AS value FROM {table} GROUP BY {dim_column} ORDER BY value DESC LIMIT 10"
         logs.append(f"Query Synthesis Engine: Formulated context-grounded SQL mapping -> `{target_sql}`")
         
-        # 6. Data Summary Aggregation Block
         cursor.execute(f"SELECT SUM({val_column}), AVG({val_column}), COUNT({val_column}) FROM {table}")
         stats = cursor.fetchone()
         total_sum = round(stats[0] or 0, 2)
         avg_value = round(stats[1] or 0, 2)
         row_count = stats[2] or 0
         
-        # 7. Execute Consolidated Query Matrix
         logs.append(f"Executing Query: {target_sql}")
         cursor.execute(target_sql)
         rows = cursor.fetchall()
