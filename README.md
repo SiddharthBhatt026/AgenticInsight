@@ -39,11 +39,23 @@ Includes a live, interactive **Active Target SQL Sandbox Editor**. If an analyst
 
 ## 🚀 Local Deployment Setup
 
-Follow these steps to activate the unified sandbox execution pipeline:
+Follow these structured steps to activate the unified sandbox execution pipeline locally:
 
-### 1. Initialize the Python Backend Engine
+### Prerequisites
+Ensure you have [Node.js (v18+)](https://nodejs.org/) and [Python (v3.10+)](https://www.python.org/) installed on your machine.
+
+### Step 1: Initialize the Python Backend Engine
+Open a new terminal window, navigate to the backend folder, configure the virtual environment, and boot up the FastAPI server:
 ```bash
+# Navigate to the backend workspace
 cd backend
+
+# Create and activate the localized virtual environment
+python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt  # Installs FastAPI, Pandas, python-multipart, openpyxl
+
+# Install the verified engineering dependencies
+pip install fastapi uvicorn pandas openpyxl python-multipart
+
+# Spin up the live API data stream
 uvicorn main:app --reload --port 8001
