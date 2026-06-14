@@ -1,24 +1,38 @@
-# Logs
-logs
-*.log
+# 🐍 Python / FastAPI Backend Filters
+backend/venv/
+backend/.venv/
+env/
+.env
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# 💾 SQLite Local Datastore Sandbox Cache
+backend/enterprise.db
+enterprise.db
+
+# 📦 Node / Vite Frontend Filters
+node_modules/
+frontend/node_modules/
+dist/
+dist-ssr/
+*.local
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# 🖥️ macOS / System Specific Artifacts
 .DS_Store
+.AppleDouble
+.LSOverride
+Thums.db
+
+# 💻 IDE Editor Configurations
+.vscode/
+!.vscode/extensions.json
+.idea/
 *.suo
-*.ntvs*
-*.njsproj
 *.sln
-*.sw?
+*.swp
