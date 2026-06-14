@@ -3,9 +3,9 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContai
 import { BotMessageSquare, BrainCircuit, Play, BarChart3, PieChart, Sparkles, AlertTriangle, Download, Code, Terminal, UploadCloud, ShieldCheck, Database } from 'lucide-react';
 
 const suggestions = [
-  "Execute Fabric IQ multi-table sales audit",
-  "Summarize enterprise customer metrics",
-  "Run security sandboxed trend analysis"
+  "Execute Fabric IQ audit on Department and Gross_Revenue",
+  "Summarize enterprise metrics by Global_Market",
+  "Run security sandboxed trend analysis on Segment"
 ];
 
 function App() {
@@ -90,7 +90,7 @@ function App() {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ display: 'flex', width: '100vw', height: '100vh', backgroundColor: '#030712' }}>
       
       {/* 🧭 LEFT CONTROL CABIN SIDEBAR */}
       <div className="sidebar">
@@ -120,6 +120,7 @@ function App() {
                 const formData = new FormData();
                 formData.append("file", uploadedFile);
                 setLoading(true);
+                setError('');
                 
                 try {
                   const res = await fetch("http://127.0.0.1:8001/api/upload", {
@@ -127,12 +128,14 @@ function App() {
                     body: formData
                   });
                   const uploadResult = await res.json();
-                  if (uploadResult.status === "success") {
+                  if (res.ok && uploadResult.status === "success") {
                     setActiveTable(uploadResult.table_name);
                     setChatLog(prev => [...prev, { 
                       role: 'agent', 
                       text: `✨ Fabric IQ Semantic Layer Active! Target linked into localized datastore slice: \`${uploadResult.table_name}\`. Extracted attributes: ${uploadResult.detected_attributes.join(", ")}` 
                     }]);
+                  } else {
+                    setError(uploadResult.detail || "Ingestion pipeline error.");
                   }
                 } catch (err) {
                   setError("Data streaming connection to IQ routing infrastructure lost.");
@@ -258,13 +261,13 @@ function App() {
         <div className="bottom-logs-grid">
           
           <div className="log-card">
-            <div className="log-header" style={{ justifyContent: 'space-between', width: '100%' }}>
+            <div className="log-header" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Terminal className="log-icon-label" />
                 <h3>Fabric IQ Multi-Step Reasoning Graph</h3>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', color: '#34d399', background: 'rgba(52, 211, 153, 0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(52, 211, 153, 0.2)' }}>
-                <ShieldCheck style={{ width: '12px', height: '12px' }} /> Guardrails: Enforced
+                Guardrails: Enforced
               </div>
             </div>
             
@@ -288,7 +291,7 @@ function App() {
           </div>
 
           <div className="log-card">
-            <div className="log-header" style={{ justifyContent: 'space-between', width: '100%' }}>
+            <div className="log-header" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Code className="log-icon-label" />
                 <h3>Target Semantic SQL Generator</h3>
